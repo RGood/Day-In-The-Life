@@ -1,80 +1,69 @@
 package codebase;
 
 import java.util.Random;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 public class Developer extends Thread implements Employee, Answerable{
-	
-	private long lunchTime;
-	private long lunchLength;
 	private String name;
 	private Askable lead;
 	
+	private BlockingQueue<Task> action;
+	private BlockingQueue<Task> answers;
+	
 	public Developer(String n, Askable l){
-		Random x = new Random();
-		lunchTime = (long)(x.nextDouble() * 8 * 60 * 10);
-		lunchLength = (long)(x.nextDouble() * 30 * 10) + 30;
 		name = n;
 		lead = l;
-	}
-
-	enum Task {
-		Questions,
-		Meeting,
-		Lunch
+		action = new ArrayBlockingQueue<Task>(1);
+		answers = new ArrayBlockingQueue<Task>(1);
 	}
 	
+	//Method to tell developer what to be doing
+	public void addTask(Task t){
+		action.add(t);
+	}
+	
+	//Method for asking sending a question
+	public void question() {
+		lead.answer(this);
+	}
+	
+	//Method for receiving question answer
 	@Override
-	public void goToMeeting(long minutes) {
-		try {
-			sleep(minutes * 10);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+	public void answer(Task t) {
+		// TODO Auto-generated method stub
+		answers.add(t);
 	}
 	
-	public Task getTask(){
-		if(Clock.getClock().curTime() < lunchTime){
-			return Task.Questions;
-		}else if(Clock.getClock().curTime() < lunchTime + lunchLength){
-			return Task.Lunch;
-		}else if(Clock.getClock().curTime() < 8 * 60 * 10){
-			return Task.Questions;
-		}else if(Clock.getClock().curTime() < 8.5 * 60 * 10){
-			return Task.Meeting;
-		}else{
-			return Task.Questions;
-		}
-	}
-	
-	public void askQuestion() {
-		lead.question(this);
-	}
-	
+	//Main run method
 	public void run(){
-		long departure = Clock.getClock().curTime() + (60 * 8 * 10) + lunchLength;
+		Random x = new Random();
 		
-		//Logic for team standup here
-		
-		while(Clock.getClock().curTime() < departure){
-			switch(getTask()){
-				case Questions: 
-					//Logic for maybe asking questions
-					askQuestion();
-					break;
-				case Lunch: 
-					try {
-						sleep(lunchLength);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					break;
-				case Meeting: 
-					try {
-						this.wait();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					break;
+		boolean running = true;
+		while(running){
+			switch(action.remove()){ //Get current to-do. Developing otherwise.
+			case Leave: //Break the loop
+				running = false;
+				break;
+			case Question: //Ask a question and wait for an answer
+				question();
+				answers.remove();
+				break;
+			case Lunch: //Go to lunch for 30-60 minutes
+				try {
+					sleep((long) (30 + (x.nextDouble() * 30)) * 10);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				break;
+			case Meeting: //Go to meeting and wait
+				try {
+					wait();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 		System.out.println("Developer " + name + " leaves for the day.");

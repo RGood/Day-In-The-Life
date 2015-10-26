@@ -2,5 +2,5 @@ package codebase;
 
 public interface Employee {
 	
-	public void goToMeeting(long minutes);
+	public void addTask(Task t);
 }

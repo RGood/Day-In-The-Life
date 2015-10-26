@@ -4,71 +4,59 @@ import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-public class TeamLead extends Thread implements Answerable, Askable, Employee{
+public class Manager extends Thread implements Askable, Employee{
 	private String name;
-	private Askable manager;
 	
 	private BlockingQueue<Task> action;
-	private BlockingQueue<Task> answers;
 	private BlockingQueue<Answerable> asker;
 	
-	public TeamLead(String n, Askable l){
+	public Manager(String n){
 		name = n;
-		manager = l;
+		
 		action = new ArrayBlockingQueue<Task>(1);
-		answers = new ArrayBlockingQueue<Task>(1);
 		asker = new ArrayBlockingQueue<Answerable>(1);
 	}
-
-	//Handles questions received
-	@Override
-	public void question() {
-		Random x = new Random();
-		if(x.nextBoolean()){
-			asker.remove().answer(Task.Answer);
-		}else{
-			manager.answer(this);
-			answers.remove();
-			asker.remove().answer(Task.Answer);
-		}
-	}
 	
-	//Method for telling Team lead what to do
+	//Public method for telling the manager what it should be doing.
 	@Override
 	public void addTask(Task t) {
 		action.add(t);
 	}
 	
-	//Method for asking team lead a question
+	//Method for obtaining questions from other people
 	@Override
 	public void answer(Answerable a) {
 		addTask(Task.Question);
 		asker.add(a);
 	}
 	
-	//Method for outside sources to respond to team lead questions
-	@Override
-	public void answer(Task t) {
-		answers.add(t);
+	//Method for handling questions received
+	private void question() {
+		try {
+			sleep(10 * 10);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		asker.remove().answer(Task.Answer);
 	}
 	
-	//Main run method
+	//Main running method
 	public void run(){
 		Random x = new Random();
 		
 		boolean running = true;
 		while(running){
 			switch(action.remove()){
-			case Leave: //Break running loop
+			case Leave: //Break main loop
 				running = false;
 				break;
-			case Question: //Ask a question and wait for an answer
+			case Question: //Answer a question
 				question();
-				answers.remove();
 				break;
-			case Lunch: //Go to lunch for 30-60 minutes
+			case Lunch: //Go to lunch for 60 minutes
 				try {
-					sleep((long) (30 + (x.nextDouble() * 30)) * 10);
+					sleep(60 * 10);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -83,7 +71,12 @@ public class TeamLead extends Thread implements Answerable, Askable, Employee{
 				}
 			}
 		}
+		System.out.println("Manager " + name + " leaves for the day.");
 		
-		System.out.println("Team lead" + name + " leaves for the day.");
 	}
+
+	
+
+	
+
 }

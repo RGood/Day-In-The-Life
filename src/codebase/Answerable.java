@@ -1,5 +1,7 @@
 package codebase;
 
 public interface Answerable {
-	public void askQuestion();
+	public void question();
+	
+	public void answer(Task t);
 }
