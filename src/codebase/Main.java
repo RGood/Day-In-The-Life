@@ -1,5 +1,6 @@
 package codebase;
 
+import java.util.Arrays;
 import java.util.Random;
 
 public class Main {
@@ -38,7 +39,19 @@ public class Main {
 		
 		// employees are in the system
 		
+		ConferenceRoom teamLeadsMeeting = new ConferenceRoom(150);
+		for (int employeeId : Arrays.asList(0, 1, 5, 9)) {
+			teamLeadsMeeting.addEmployee(employees[employeeId]);
+		}
+		teamLeadsMeeting.run();
 		
+		for(int teamNumber=0; teamNumber<3; teamNumber++) {
+			ConferenceRoom teamMeeting = new ConferenceRoom(150);
+			for (int employeeId : Arrays.asList(1+teamNumber*4, 2+teamNumber*4, 3+teamNumber*4, 4+teamNumber*4)) {
+				teamMeeting.addEmployee(employees[employeeId]);
+			}
+			teamMeeting.start();
+		}
 		
 	}
 

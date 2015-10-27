@@ -13,6 +13,8 @@ public class TeamLead extends Thread implements Answerable, Askable, Employee{
 	private BlockingQueue<Task> answers;
 	private BlockingQueue<Answerable> asker;
 	
+	private boolean inMeeting;
+	
 	public TeamLead(Integer n, Askable l){
 		teamNumber = n;
 		memberNumber = 1;
@@ -20,8 +22,13 @@ public class TeamLead extends Thread implements Answerable, Askable, Employee{
 		action = new ArrayBlockingQueue<Task>(1);
 		answers = new ArrayBlockingQueue<Task>(1);
 		asker = new ArrayBlockingQueue<Answerable>(1);
+		inMeeting = false;
 	}
 
+	public boolean inMeeting() {
+		return inMeeting;
+	}
+	
 	//Handles questions received
 	@Override
 	public void question() {
@@ -38,20 +45,35 @@ public class TeamLead extends Thread implements Answerable, Askable, Employee{
 	//Method for telling Team lead what to do
 	@Override
 	public void addTask(Task t) {
-		action.add(t);
+		try {
+			action.put(t);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	//Method for asking team lead a question
 	@Override
 	public void answer(Answerable a) {
 		addTask(Task.Question);
-		asker.add(a);
+		try {
+			asker.put(a);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	//Method for outside sources to respond to team lead questions
 	@Override
 	public void answer(Task t) {
-		answers.add(t);
+		try {
+			answers.put(t);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void log(String log) {
@@ -60,7 +82,6 @@ public class TeamLead extends Thread implements Answerable, Askable, Employee{
 	
 	//Main run method
 	public void run(){
-		log(" enters work.");
 		Random x = new Random();
 		
 		boolean running = true;
@@ -87,8 +108,9 @@ public class TeamLead extends Thread implements Answerable, Askable, Employee{
 					}
 					break;
 				case Meeting: //Go to meeting and wait
-					log(" goes to a meeting.");
+					inMeeting = true;
 					action.take();
+					inMeeting = false;
 				}
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block for taking an action

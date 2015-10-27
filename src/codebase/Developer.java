@@ -13,17 +13,29 @@ public class Developer extends Thread implements Employee, Answerable{
 	private BlockingQueue<Task> action;
 	private BlockingQueue<Task> answers;
 	
+	private boolean inMeeting;
+	
 	public Developer(Integer n, Integer m, Askable l){
 		teamNumber = n;
 		memberNumber = m;
 		lead = l;
 		action = new ArrayBlockingQueue<Task>(1);
 		answers = new ArrayBlockingQueue<Task>(1);
+		inMeeting = false;
+	}
+	
+	public boolean inMeeting() {
+		return inMeeting;
 	}
 	
 	//Method to tell developer what to be doing
 	public void addTask(Task t){
-		action.add(t);
+		try {
+			action.put(t);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	//Method for asking sending a question
@@ -35,7 +47,12 @@ public class Developer extends Thread implements Employee, Answerable{
 	@Override
 	public void answer(Task t) {
 		// TODO Auto-generated method stub
-		answers.add(t);
+		try {
+			answers.put(t);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void log(String log) {
@@ -44,11 +61,10 @@ public class Developer extends Thread implements Employee, Answerable{
 	
 	//Main run method
 	public void run(){
-		log(" enters work.");
 		Random x = new Random();
 		
 		boolean running = true;
-		log(" arrives at work");
+		log(" enters work.");
 		while(running){
 			try {
 				switch(action.take()){ //Get current to-do. Developing otherwise.
@@ -71,8 +87,9 @@ public class Developer extends Thread implements Employee, Answerable{
 					}
 					break;
 				case Meeting: //Go to meeting and wait
-					log(" goes to a meeting.");
+					inMeeting = true;
 					action.take();
+					inMeeting = false;
 				}
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block for taking an action

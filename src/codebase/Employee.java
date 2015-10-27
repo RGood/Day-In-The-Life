@@ -6,4 +6,5 @@ public interface Employee {
 	
 	public void log(String log);
 	
+	public boolean inMeeting();
 }

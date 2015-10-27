@@ -8,22 +8,39 @@ public class Manager extends Thread implements Askable, Employee{
 	private BlockingQueue<Task> action;
 	private BlockingQueue<Answerable> asker;
 	
+	private boolean inMeeting;
+	
 	public Manager(){		
 		action = new ArrayBlockingQueue<Task>(1);
 		asker = new ArrayBlockingQueue<Answerable>(1);
+		inMeeting = false;
+	}
+	
+	public boolean inMeeting() {
+		return inMeeting;
 	}
 	
 	//Public method for telling the manager what it should be doing.
 	@Override
 	public void addTask(Task t) {
-		action.add(t);
+		try {
+			action.put(t);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	//Method for obtaining questions from other people
 	@Override
 	public void answer(Answerable a) {
 		addTask(Task.Question);
-		asker.add(a);
+		try {
+			asker.put(a);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	//Method for handling questions received
@@ -43,10 +60,8 @@ public class Manager extends Thread implements Askable, Employee{
 	
 	//Main running method
 	public void run(){
-		log(" enters work.");
-		
 		boolean running = true;
-		log(" arrives at work");
+		log(" enters work.");
 		while(running){
 			try {
 				switch(action.take()){
@@ -67,8 +82,9 @@ public class Manager extends Thread implements Askable, Employee{
 					}
 					break;
 				case Meeting: //Go to meeting and wait
-					log(" goes to a meeting.");
+					inMeeting = true;
 					action.take();
+					inMeeting = false;
 				}
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block for taking an action
