@@ -5,6 +5,5 @@ public enum Task {
 	Question,
 	Answer,
 	Leave,
-	Lunch,
-	MeetingRelease
+	Lunch
 }

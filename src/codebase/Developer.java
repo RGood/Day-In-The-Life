@@ -3,6 +3,8 @@ package codebase;
 import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
 
 public class Developer extends Thread implements Employee, Answerable{
 	private Integer teamNumber;
@@ -13,7 +15,7 @@ public class Developer extends Thread implements Employee, Answerable{
 	private BlockingQueue<Task> action;
 	private BlockingQueue<Task> answers;
 	
-	private boolean inMeeting;
+	private ConferenceRoom meetingRoom;
 	
 	public Developer(Integer n, Integer m, Askable l){
 		teamNumber = n;
@@ -21,11 +23,6 @@ public class Developer extends Thread implements Employee, Answerable{
 		lead = l;
 		action = new ArrayBlockingQueue<Task>(1);
 		answers = new ArrayBlockingQueue<Task>(1);
-		inMeeting = false;
-	}
-	
-	public boolean inMeeting() {
-		return inMeeting;
 	}
 	
 	//Method to tell developer what to be doing
@@ -55,8 +52,15 @@ public class Developer extends Thread implements Employee, Answerable{
 		}
 	}
 	
+	@Override
 	public void log(String log) {
-		System.out.println("Developer " + teamNumber.toString() + "" + memberNumber.toString() + log);
+		System.out.println("Developer " + teamNumber.toString() + "" + memberNumber.toString() +
+											log + "\t at " + Clock.getClock().currentTimeSimulated());
+	}
+	
+	@Override
+	public void setMeeting(ConferenceRoom cr) {
+		this.meetingRoom = cr;
 	}
 	
 	//Main run method
@@ -64,7 +68,7 @@ public class Developer extends Thread implements Employee, Answerable{
 		Random x = new Random();
 		
 		boolean running = true;
-		log(" enters work.");
+		log(" enters work");
 		while(running){
 			try {
 				switch(action.take()){ //Get current to-do. Developing otherwise.
@@ -72,13 +76,13 @@ public class Developer extends Thread implements Employee, Answerable{
 					running = false;
 					break;
 				case Question: //Ask a question and wait for an answer
-					log(" asks a question.");
+					log(" asks a question");
 					question();
 					answers.take();
-					log(" got an answer.");
+					log(" got an answer");
 					break;
 				case Lunch: //Go to lunch for 30-60 minutes
-					log(" goes to lunch.");
+					log(" goes to lunch");
 					try {
 						sleep((long) (30 + (x.nextDouble() * 30)) * 10);
 					} catch (InterruptedException e) {
@@ -87,15 +91,15 @@ public class Developer extends Thread implements Employee, Answerable{
 					}
 					break;
 				case Meeting: //Go to meeting and wait
-					inMeeting = true;
-					action.take();
-					inMeeting = false;
+					log(" waits to meet");
+					meetingRoom.awaitMeeting();
+					log(" leaves meeting");
 				}
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block for taking an action
 				e.printStackTrace();
 			}
 		}
-		log(" leaves for the day.");
+		log(" leaves for the day");
 	}
 }

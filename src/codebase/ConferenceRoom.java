@@ -1,61 +1,62 @@
 package codebase;
 
 import java.util.ArrayList;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
 
 public class ConferenceRoom extends Thread{
-	ArrayList<Employee> waiting;
-	long meetingTime;
-	private static volatile boolean semiphoreLock; 
+	private ArrayList<Employee> waiting;
+	private long meetingTime;
+	CyclicBarrier roomBarrier;
+	private boolean roomSet;
+	public static boolean meetingInProgress;
 	
-	public ConferenceRoom(long meetingTime) {
+	public ConferenceRoom() {
 		waiting = new ArrayList<Employee>();
+		roomSet = false;
+		meetingInProgress = false;
+	}
+	
+	public void setRoomMeeting(long meetingTime, int meetingSize) {
+		while(roomSet || ConferenceRoom.meetingInProgress);
 		this.meetingTime = meetingTime;
+		roomBarrier = new CyclicBarrier(meetingSize, this);
+		roomSet = true;
 	}
 	
 	public void addEmployee(Employee e) {
 		waiting.add(e);
+		e.setMeeting(this);
+		e.addTask(Task.Meeting);
 	}
 	
-	public synchronized static void lock() {
-		while (semiphoreLock);
-		semiphoreLock = true;
-	}
-	
-	public synchronized static void unlock() {
-		semiphoreLock = false;
-	}
-	
-	public boolean allPresent() {
-		for (Employee e : waiting) {
-			if (!e.inMeeting()) {
-				return false;
-			}
+	public void awaitMeeting() {
+		while(ConferenceRoom.meetingInProgress);
+		try {
+			roomBarrier.await();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (BrokenBarrierException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		return true;
 	}
 	
 	public void run(){
-		for (Employee e : waiting) {
-			e.addTask(Task.Meeting);
+		meetingInProgress = true;
+		for(Employee e : waiting) {
+			e.log(" enters meeting");
 		}
-		while (!allPresent());
-		lock();
-		{
-			for (Employee e : waiting) {
-				e.log(" enters a meeting");
-			}
-			try {
-				sleep(meetingTime);
-			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			for (Employee e : waiting) {
-				e.addTask(Task.MeetingRelease);
-				e.log(" leaves a meeting");
-			}
+		try {
+			sleep(meetingTime);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
-		unlock();
+		roomSet = false;
+		waiting.clear();
+		meetingInProgress = false;
 	}
 	
 }

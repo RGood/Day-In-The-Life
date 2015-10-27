@@ -21,7 +21,16 @@ public class Clock {
 	
 	public String currentTimeSimulated(){
 		long realTime = currentTimeReal();
-		long minutes = realTime/10;
-		return ":";
+
+		int hours = (int) (realTime/600);
+		int minutes = (int) ((realTime-(600*hours)) / 10);
+		
+		hours = hours + 8; // clock actually starts at 8
+		
+		if (minutes < 10) {
+			return hours + ":0" + minutes;
+		} else {
+			return hours + ":" + minutes;
+		}
 	}
 }

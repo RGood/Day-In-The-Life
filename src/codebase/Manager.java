@@ -2,22 +2,19 @@ package codebase;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
 
 public class Manager extends Thread implements Askable, Employee{
 	
 	private BlockingQueue<Task> action;
 	private BlockingQueue<Answerable> asker;
 	
-	private boolean inMeeting;
+	private ConferenceRoom meetingRoom;
 	
 	public Manager(){		
 		action = new ArrayBlockingQueue<Task>(1);
 		asker = new ArrayBlockingQueue<Answerable>(1);
-		inMeeting = false;
-	}
-	
-	public boolean inMeeting() {
-		return inMeeting;
 	}
 	
 	//Public method for telling the manager what it should be doing.
@@ -55,13 +52,18 @@ public class Manager extends Thread implements Askable, Employee{
 	}
 	
 	public void log(String log) {
-		System.out.println("Manager" + log);
+		System.out.println("Manager     " + log + "\t at " + Clock.getClock().currentTimeSimulated());
+	}
+
+	@Override
+	public void setMeeting(ConferenceRoom cr) {
+		this.meetingRoom = cr;
 	}
 	
 	//Main running method
 	public void run(){
 		boolean running = true;
-		log(" enters work.");
+		log(" enters work");
 		while(running){
 			try {
 				switch(action.take()){
@@ -69,11 +71,11 @@ public class Manager extends Thread implements Askable, Employee{
 					running = false;
 					break;
 				case Question: //Answer a question
-					log(" answers a question.");
+					log(" answers a question");
 					question();
 					break;
 				case Lunch: //Go to lunch for 60 minutes
-					log(" goes to lunch.");
+					log(" goes to lunch");
 					try {
 						sleep(60 * 10);
 					} catch (InterruptedException e) {
@@ -82,16 +84,16 @@ public class Manager extends Thread implements Askable, Employee{
 					}
 					break;
 				case Meeting: //Go to meeting and wait
-					inMeeting = true;
-					action.take();
-					inMeeting = false;
+					log(" waits to meet");
+					meetingRoom.awaitMeeting();
+					log(" leaves meeting");
 				}
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block for taking an action
 				e.printStackTrace();
 			}
 		}
-		log(" leaves for the day.");
+		log(" leaves for the day");
 		
 	}
 
