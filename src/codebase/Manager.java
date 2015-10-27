@@ -1,18 +1,14 @@
 package codebase;
 
-import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 public class Manager extends Thread implements Askable, Employee{
-	private String name;
 	
 	private BlockingQueue<Task> action;
 	private BlockingQueue<Answerable> asker;
 	
-	public Manager(String n){
-		name = n;
-		
+	public Manager(){		
 		action = new ArrayBlockingQueue<Task>(1);
 		asker = new ArrayBlockingQueue<Answerable>(1);
 	}
@@ -41,37 +37,45 @@ public class Manager extends Thread implements Askable, Employee{
 		asker.remove().answer(Task.Answer);
 	}
 	
+	public void log(String log) {
+		System.out.println("Manager" + log);
+	}
+	
 	//Main running method
 	public void run(){
-		Random x = new Random();
+		log(" enters work.");
 		
 		boolean running = true;
+		log(" arrives at work");
 		while(running){
-			switch(action.remove()){
-			case Leave: //Break main loop
-				running = false;
-				break;
-			case Question: //Answer a question
-				question();
-				break;
-			case Lunch: //Go to lunch for 60 minutes
-				try {
-					sleep(60 * 10);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			try {
+				switch(action.take()){
+				case Leave: //Break main loop
+					running = false;
+					break;
+				case Question: //Answer a question
+					log(" answers a question.");
+					question();
+					break;
+				case Lunch: //Go to lunch for 60 minutes
+					log(" goes to lunch.");
+					try {
+						sleep(60 * 10);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					break;
+				case Meeting: //Go to meeting and wait
+					log(" goes to a meeting.");
+					action.take();
 				}
-				break;
-			case Meeting: //Go to meeting and wait
-				try {
-					wait();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block for taking an action
+				e.printStackTrace();
 			}
 		}
-		System.out.println("Manager " + name + " leaves for the day.");
+		log(" leaves for the day.");
 		
 	}
 

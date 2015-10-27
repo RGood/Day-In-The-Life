@@ -15,7 +15,13 @@ public class Clock {
 		return instance;
 	}
 	
-	public long curTime(){
+	public long currentTimeReal(){
 		return System.currentTimeMillis() - startTime;
+	}
+	
+	public String currentTimeSimulated(){
+		long realTime = currentTimeReal();
+		long minutes = realTime/10;
+		return ":";
 	}
 }

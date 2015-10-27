@@ -5,15 +5,17 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 public class TeamLead extends Thread implements Answerable, Askable, Employee{
-	private String name;
+	private Integer teamNumber;
+	private Integer memberNumber; // 1 for team leads
 	private Askable manager;
 	
 	private BlockingQueue<Task> action;
 	private BlockingQueue<Task> answers;
 	private BlockingQueue<Answerable> asker;
 	
-	public TeamLead(String n, Askable l){
-		name = n;
+	public TeamLead(Integer n, Askable l){
+		teamNumber = n;
+		memberNumber = 1;
 		manager = l;
 		action = new ArrayBlockingQueue<Task>(1);
 		answers = new ArrayBlockingQueue<Task>(1);
@@ -52,38 +54,48 @@ public class TeamLead extends Thread implements Answerable, Askable, Employee{
 		answers.add(t);
 	}
 	
+	public void log(String log) {
+		System.out.println("Developer " + teamNumber.toString() + "" + memberNumber.toString() + log);
+	}
+	
 	//Main run method
 	public void run(){
+		log(" enters work.");
 		Random x = new Random();
 		
 		boolean running = true;
+		log(" enters work.");
 		while(running){
-			switch(action.remove()){
-			case Leave: //Break running loop
-				running = false;
-				break;
-			case Question: //Ask a question and wait for an answer
-				question();
-				answers.remove();
-				break;
-			case Lunch: //Go to lunch for 30-60 minutes
-				try {
-					sleep((long) (30 + (x.nextDouble() * 30)) * 10);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			try {
+				switch(action.take()){
+				case Leave: //Break running loop
+					running = false;
+					break;
+				case Question: //Ask a question and wait for an answer
+					log(" asks a question.");
+					question();
+					answers.take();
+					log(" got an answer.");
+					break;
+				case Lunch: //Go to lunch for 30-60 minutes
+					log(" goes to lunch.");
+					try {
+						sleep((long) (30 + (x.nextDouble() * 30)) * 10);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					break;
+				case Meeting: //Go to meeting and wait
+					log(" goes to a meeting.");
+					action.take();
 				}
-				break;
-			case Meeting: //Go to meeting and wait
-				try {
-					wait();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block for taking an action
+				e.printStackTrace();
 			}
 		}
 		
-		System.out.println("Team lead" + name + " leaves for the day.");
+		log(" leaves for the day.");
 	}
 }
