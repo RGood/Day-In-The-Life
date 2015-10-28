@@ -1,10 +1,10 @@
 package codebase;
 
 public class StartWorkTimer extends Thread{
-	private Thread e;
+	private Employee e;
 	private long delay;
 	
-	public StartWorkTimer(Thread e, long delayMillis) {
+	public StartWorkTimer(Employee e, long delayMillis) {
 		this.e = e;
 		this.delay = delayMillis;
 	}
@@ -17,7 +17,7 @@ public class StartWorkTimer extends Thread{
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		this.e.start();
+		((Thread) this.e).start();
 	}
 
 }

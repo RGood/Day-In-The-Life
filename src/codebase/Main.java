@@ -43,24 +43,31 @@ public class Main {
 				
 				// add task to start work
 				double startTime = 300*random.nextDouble();
-				new StartWorkTimer((Thread)employees[employeeId], (long)(startTime)).start();
+				new StartWorkTimer(employees[employeeId], (long)(startTime)).start();
+				
+				// add task to go to lunch
+				// assume everybody goes to lunch around 12 - 1
+				new TimedAddTask(employees[employeeId], Task.Lunch, (long) (2400+random.nextDouble()*300));
 				
 				if (memberNumber == 1) {
+					// add task to leave work
 					new LeaveWorkTimer(employees[employeeId], Task.Leave, (long)(startTime+5100+random.nextDouble()*300), 
 							Arrays.asList(employees[employeeId+1],employees[employeeId+2], employees[employeeId+3]));
 				}
 				else {
+					// add task to leave work
 					new LeaveWorkTimer(employees[employeeId], Task.Leave, (long)(startTime+5100+random.nextDouble()*300));
 				}
 			}
 		}
 		
-		// when the manager should leave
+		// when the manager should lunch
+		new TimedAddTask(employees[0], Task.Lunch, (long) (2400));
 		
+		// when the manager should leave
 		// make a list of all employees (excluding the manager)
 		ArrayList<Employee> employeeList = new ArrayList<Employee>(Arrays.asList(employees));
 		employeeList.remove(0);
-		
 		new LeaveWorkTimer(employees[0], Task.Leave, 5400, employeeList);
 				
 		ConferenceRoom meeting = new ConferenceRoom();
