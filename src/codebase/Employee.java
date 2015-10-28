@@ -10,4 +10,6 @@ public interface Employee extends Runnable {
 	public void log(String log);
 	
 	public void setMeeting(ConferenceRoom cr);
+	
+	public boolean atWork();
 }

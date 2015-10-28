@@ -1,6 +1,8 @@
 package codebase;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.BrokenBarrierException;
 
@@ -20,7 +22,7 @@ public class Main {
 		employees[0] = new Manager();
 		((Thread) employees[0]).start(); // manager starts right at 8
 
-		Random startTime = new Random();
+		Random random = new Random();
 		
 		for(int teamNumber=0; teamNumber < 3; teamNumber++) {
 			for (int memberNumber=1; memberNumber < 5; memberNumber++) {
@@ -33,12 +35,34 @@ public class Main {
 					employees[employeeId] = 
 							new Developer(teamNumber+1, memberNumber, (TeamLead)employees[teamNumber*4+1]);
 				}
-				new StartWorkTimer((Thread)employees[employeeId], (long)(300*startTime.nextDouble())).start();
+			}
+			
+			// add tasks
+			for (int memberNumber=1; memberNumber < 5; memberNumber++) {
+				int employeeId = teamNumber*4+memberNumber;
+				
+				// add task to start work
+				double startTime = 300*random.nextDouble();
+				new StartWorkTimer((Thread)employees[employeeId], (long)(startTime)).start();
+				
+				if (memberNumber == 1) {
+					new LeaveWorkTimer(employees[employeeId], Task.Leave, (long)(startTime+5100+random.nextDouble()*300), 
+							Arrays.asList(employees[employeeId+1],employees[employeeId+2], employees[employeeId+3]));
+				}
+				else {
+					new LeaveWorkTimer(employees[employeeId], Task.Leave, (long)(startTime+5100+random.nextDouble()*300));
+				}
 			}
 		}
 		
-		// employees are in the system
+		// when the manager should leave
 		
+		// make a list of all employees (excluding the manager)
+		ArrayList<Employee> employeeList = new ArrayList<Employee>(Arrays.asList(employees));
+		employeeList.remove(0);
+		
+		new LeaveWorkTimer(employees[0], Task.Leave, 5400, employeeList);
+				
 		ConferenceRoom meeting = new ConferenceRoom();
 		meeting.setRoomMeeting(150, 4);
 		for (int employeeId : Arrays.asList(0, 1, 5, 9)) {
@@ -51,7 +75,7 @@ public class Main {
 				meeting.addEmployee(employees[employeeId]);
 			}
 		}
-
+		
 	}
 
 }

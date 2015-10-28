@@ -12,6 +12,8 @@ public class Manager extends Thread implements Askable, Employee{
 	
 	private ConferenceRoom meetingRoom;
 	
+	private boolean running;
+	
 	public Manager(){		
 		action = new ArrayBlockingQueue<Task>(1);
 		asker = new ArrayBlockingQueue<Answerable>(1);
@@ -62,7 +64,7 @@ public class Manager extends Thread implements Askable, Employee{
 	
 	//Main running method
 	public void run(){
-		boolean running = true;
+		running = true;
 		log(" enters work");
 		while(running){
 			try {
@@ -97,8 +99,9 @@ public class Manager extends Thread implements Askable, Employee{
 		
 	}
 
-	
-
-	
+	@Override
+	public boolean atWork() {
+		return running;
+	}
 
 }

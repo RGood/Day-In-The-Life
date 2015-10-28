@@ -17,6 +17,8 @@ public class TeamLead extends Thread implements Answerable, Askable, Employee{
 	
 	private ConferenceRoom meetingRoom;
 	
+	private boolean running;
+	
 	public TeamLead(Integer n, Askable l){
 		teamNumber = n;
 		memberNumber = 1;
@@ -87,7 +89,7 @@ public class TeamLead extends Thread implements Answerable, Askable, Employee{
 	public void run(){
 		Random x = new Random();
 		
-		boolean running = true;
+		running = true;
 		log(" enters work");
 		while(running){
 			try {
@@ -122,5 +124,10 @@ public class TeamLead extends Thread implements Answerable, Askable, Employee{
 		}
 		
 		log(" leaves for the day");
+	}
+
+	@Override
+	public boolean atWork() {
+		return running;
 	}
 }

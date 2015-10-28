@@ -15,6 +15,8 @@ public class Developer extends Thread implements Employee, Answerable{
 	private BlockingQueue<Task> action;
 	private BlockingQueue<Task> answers;
 	
+	private boolean running;
+	
 	private ConferenceRoom meetingRoom;
 	
 	public Developer(Integer n, Integer m, Askable l){
@@ -67,7 +69,7 @@ public class Developer extends Thread implements Employee, Answerable{
 	public void run(){
 		Random x = new Random();
 		
-		boolean running = true;
+		running = true;
 		log(" enters work");
 		while(running){
 			try {
@@ -101,5 +103,10 @@ public class Developer extends Thread implements Employee, Answerable{
 			}
 		}
 		log(" leaves for the day");
+	}
+
+	@Override
+	public boolean atWork() {
+		return running;
 	}
 }
