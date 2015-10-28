@@ -46,11 +46,11 @@ public class Manager extends Thread implements Askable, Employee{
 	private void question() {
 		try {
 			sleep(10 * 10);
+			asker.take().answer(Task.Answer);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		asker.remove().answer(Task.Answer);
 	}
 	
 	public void log(String log) {

@@ -49,6 +49,14 @@ public class Main {
 				// assume everybody goes to lunch around 12 - 1
 				new TimedAddTask(employees[employeeId], Task.Lunch, (long) (2400+random.nextDouble()*300));
 				
+				// add question tasks
+				// assume everyone will ask around 5 questions at most
+				int maxQuestions = random.nextInt(2);
+				for(int q=0; q<maxQuestions; q++) {
+					new TimedAddTask(employees[employeeId], Task.Question, (long) (startTime + 5100*random.nextDouble()));
+				}
+				
+				// assume startTime + 8 hours 30 minutes will put people between 4:30 and 5:00
 				if (memberNumber == 1) {
 					// add task to leave work
 					new LeaveWorkTimer(employees[employeeId], Task.Leave, (long)(startTime+5100+random.nextDouble()*300), 

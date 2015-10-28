@@ -31,13 +31,18 @@ public class TeamLead extends Thread implements Answerable, Askable, Employee{
 	//Handles questions received
 	@Override
 	public void question() {
-		Random x = new Random();
-		if(x.nextBoolean()){
-			asker.remove().answer(Task.Answer);
-		}else{
-			manager.answer(this);
-			answers.remove();
-			asker.remove().answer(Task.Answer);
+		try {
+			Random x = new Random();
+			if(x.nextBoolean()){
+				asker.take().answer(Task.Answer);
+			}else{
+				manager.answer(this);
+				answers.take();
+				asker.take().answer(Task.Answer);
+			}
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
